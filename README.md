@@ -72,3 +72,28 @@ This script orchestrates the complex handovers between environments:
 #### Phase 4: Simulation
 1.  **Visualize:** Use `visualize.py` to check if "Chair" actually highlights the chair.
 2.  **Import:** Point **GaussGym** or **Isaac Sim** to your `output/` folder. The simulator loads the 3DGS visual model and the collision bounds from the Graph, creating a functional Digital Twin.
+
+## Troubleshooting & Common Failure Modes
+
+### CUDA Out of Memory (OOM)
+The most common failure is running out of VRAM (CUDA Out of Memory) during the Gaussian Splatting or LangSplat training steps. This typically happens if the dataset is too large for your GPU.
+
+**Symptoms:**
+*   Pipeline crashes with `RuntimeError: CUDA out of memory`.
+*   System becomes unresponsive during training.
+
+**Solutions:**
+1.  **Reduce Image Count:** Ensure you are using **fewer than 300 images**.
+    *   *Fix:* Delete every 2nd or 3rd image in your `images/` folder to reduce the count (e.g., aim for 100-150).
+2.  **Downscale Images:** High-resolution images (4K+) consume significantly more VRAM.
+    *   *Fix:* Resize your input images to roughly 1920x1080 or 1600x1200 before running the pipeline.
+3.  **Close Other Apps:** Ensure no other GPU-intensive applications (games, other training runs, Viser) are running.
+
+### COLMAP Failures
+If COLMAP fails to register images (creating a sparse point cloud with very few or zero points):
+*   **Cause:** Images lack texture or overlap.
+*   **Fix:** Ensure your photos have at least 60-70% overlap. Add texture to the scene (place the object on a patterned rug/newspaper) if the background is a plain white wall.
+
+## Getting Started
+
+For a complete "From Zero to Hero" guide on how to setup, capture data, and run the pipeline, please see the [Scripts Documentation](scripts/README.md).
