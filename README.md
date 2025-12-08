@@ -69,9 +69,30 @@ This script orchestrates the complex handovers between environments:
     *   Groups these semantic blobs into distinct 3D objects (e.g., "Chair 1", "Table").
     *   Calculates 3D Bounding Boxes (OBB) for physics simulation.
 
-#### Phase 4: Simulation
-1.  **Visualize:** Use `visualize.py` to check if "Chair" actually highlights the chair.
-2.  **Import:** Point **GaussGym** or **Isaac Sim** to your `output/` folder. The simulator loads the 3DGS visual model and the collision bounds from the Graph, creating a functional Digital Twin.
+
+#### Phase 4: Import to GaussGym
+To bring your reconstructed scene into the RL/Simulation environment, we need to structure the data and generate navigation meshes. We have automated this process:
+
+1.  **Run the Import Script:**
+    ```bash
+    ./scripts/import_splatgraph_to_gaussgym.sh <scene_name> <path_to_data> <target_gauss_gym_path>
+    # Example:
+    # ./scripts/import_splatgraph_to_gaussgym.sh ramen ./data/ramen ./data/ramen/gauss_gym
+    ```
+    This script will:
+    *   Link the Point Cloud and Language Features.
+    *   Convert camera metadata to standard `transforms.json`.
+    *   Generate a `slice_0000.npz` mesh for robot navigation.
+
+#### Phase 5: Simulation
+1.  **Visualize (Optional):** Use `visualize.py` to check if "Chair" actually highlights the chair.
+2.  **Run GaussGym:**
+    ```bash
+    gauss_play --task=t1 --env.num_envs 1 \
+        --terrain.scenes.iphone_data.repo_id=local:/absolute/path/to/data/ramen/gauss_gym \
+        --terrain.scenes.grand_tour.split_frac=0.0 \
+        --terrain.scenes.arkit.split_frac=0.0
+    ```
 
 ## Troubleshooting & Common Failure Modes
 
