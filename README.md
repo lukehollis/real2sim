@@ -25,7 +25,7 @@ To make the scene "understandable" to robots, we integrate [LangSplat](https://l
 We generate a hierarchical 3D Scene Graph from the varying levels of LangSplat features. This structures the scene into distinct objects with bounding boxes and relationship hierarchies, which is critical for physics simulation.
 
 **GaussGym / Isaac Sim:**
-The final output is designed for ingestion into [GaussGym](https://escontrela.me/gauss_gym/) (RL environment) or **Isaac Sim** (Interactive Simulation). These platforms effectively "import" the digitised reality, allowing us to train robot policies in photorealistic twins of the real world.
+The final output is designed for ingestion into **Isaac Sim** (Interactive Simulation) or downstream RL environments like [GaussGym](https://escontrela.me/gauss_gym/). These platforms effectively "import" the digitised reality, allowing us to train robot policies in photorealistic twins of the real world.
 
 ### 2. High-Level Workflow
 
@@ -68,31 +68,23 @@ This script orchestrates the complex handovers between environments:
 *   **Step 6: SplatGraph Generation:** *Env: `langsplat_v2`*
     *   Groups these semantic blobs into distinct 3D objects (e.g., "Chair 1", "Table").
     *   Calculates 3D Bounding Boxes (OBB) for physics simulation.
+*   **Step 7: SAM-3D Generative Reconstruction:** *Env: `sam3d-objects`*
+    *   Lifts the 2D segmentations into full 3D generative meshes using SAM-3D.
+*   **Step 8: USD Export & VLM Labeling:** *Env: `splatgraph`*
+    *   Converts the SAM-3D Gaussian splats to triangulated, watertight surfaces.
+    *   Queries OpenRouter (VLM) for semantic object names and physical properties (mass, friction, deformability).
+    *   Generates tetrahedral `_physics.vtk` files for soft bodies and builds the final `scene.usd` file for Isaac Sim.
 
+#### Phase 4: Import to Isaac Sim
 
-#### Phase 4: Import to GaussGym
-To bring your reconstructed scene into the RL/Simulation environment, we need to structure the data and generate navigation meshes. We have automated this process:
+The entire pipeline natively completes by writing out an Isaac Sim compatible USD scene.
+You no longer need to run any external import scripts.
 
-1.  **Run the Import Script:**
-    ```bash
-    ./scripts/import_splatgraph_to_gaussgym.sh <scene_name> <path_to_data> <target_gauss_gym_path>
-    # Example:
-    # ./scripts/import_splatgraph_to_gaussgym.sh ramen ./data/ramen ./data/ramen/gauss_gym
-    ```
-    This script will:
-    *   Link the Point Cloud and Language Features.
-    *   Convert camera metadata to standard `transforms.json`.
-    *   Generate a `slice_0000.npz` mesh for robot navigation.
-
-#### Phase 5: Simulation
-1.  **Visualize (Optional):** Use `visualize.py` to check if "Chair" actually highlights the chair.
-2.  **Run GaussGym:**
-    ```bash
-    gauss_play --task=t1 --env.num_envs 1 \
-        --terrain.scenes.iphone_data.repo_id=local:/absolute/path/to/data/ramen/gauss_gym \
-        --terrain.scenes.grand_tour.split_frac=0.0 \
-        --terrain.scenes.arkit.split_frac=0.0
-    ```
+To view your reconstructed scene in Isaac Sim, simply run the generated command shown at the end of the pipeline. For example:
+```bash
+/home/lrh/Research/nvidia/IsaacLab/isaaclab.sh -p /home/lrh/Research/computational_robotics/view_scene.py \
+    --usd_path /home/lrh/Research/computational_robotics/data/YOUR_SCENE/usd_export/scene.usd
+```
 
 ## Troubleshooting & Common Failure Modes
 

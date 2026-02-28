@@ -1,6 +1,3 @@
-[submodule "gauss_gym"]
-	path = gauss_gym
-	url = https://github.com/escontra/gauss_gym.git
 [submodule "gaussian-splatting"]
 	path = gaussian-splatting
 	url = git@github.com:lukehollis/gaussian-splatting.git
