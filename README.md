@@ -1,4 +1,11 @@
+https://github.com/user-attachments/assets/b7e50b54-dbf9-4264-b5e4-7d12432ca244
+
+
+
+
 # Real2Sim Pipeline
+
+
 
 This repository contains the full pipeline for 3D scene reconstruction and semantic segmentation, integrating **Gaussian Splatting**, **LangSplatV2**, and **SplatGraph**.
 
